@@ -1,0 +1,34 @@
+RewriteEngine On
+
+# Route all API requests to the PHP API router
+RewriteRule ^api/?$ api/api.php [L,QSA]
+RewriteRule ^api/([a-z0-9-]+)/?$ api/api.php [L,QSA]
+RewriteRule ^api/([a-z0-9-]+)/([a-z0-9-]+)/?$ api/api.php [L,QSA]
+
+# Serve index.php for the root and all non-file routes (SPA fallback)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^$ index.php [L]
+
+# Allow access to uploads
+RewriteRule ^uploads/(.*)$ uploads/$1 [L]
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "no-referrer-when-downgrade"
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Protect config file
+<Files "config.php">
+  Order Allow,Deny
+  Deny from all
+</Files>
+
+# PHP settings
+php_value upload_max_filesize 5M
+php_value post_max_size 5M
